@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChefHat, Facebook, Twitter, Instagram, Youtube, Mail, Heart } from 'lucide-react';
+import { ChefHat, Facebook, Twitter, Instagram, Mail, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -27,9 +27,6 @@ const Footer = () => {
               </a>
               <a href="#" className="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors">
                 <Instagram size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-colors">
-                <Youtube size={18} />
               </a>
             </div>
           </div>
