@@ -31,12 +31,11 @@ const RecipeCard = ({ id, title, image, time, difficulty, calories, author }) =>
             onClick={async (e) => {
               e.preventDefault();
               try {
-                if (isSaved) {
-                  await api.delete(`/favorites/${id}`);
+                const res = await api.post('/favorites', { recipeId: id });
+                if (res.data.action === 'removed') {
                   setIsSaved(false);
                   toast.success('Removed from Favorites');
                 } else {
-                  await api.post('/favorites', { recipeId: id });
                   setIsSaved(true);
                   toast.success('Saved to Favorites!');
                 }

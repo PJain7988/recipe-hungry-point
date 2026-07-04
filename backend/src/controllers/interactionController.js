@@ -8,10 +8,14 @@ const { awardXP } = require('../utils/gamification');
 exports.addFavorite = async (req, res) => {
   try {
     const { recipeId } = req.body;
+    const existing = await Favorite.findOne({ user: req.user._id, recipe: recipeId });
+    if (existing) {
+      await Favorite.findByIdAndDelete(existing._id);
+      return res.status(200).json({ status: 'success', action: 'removed' });
+    }
     const favorite = await Favorite.create({ user: req.user._id, recipe: recipeId });
-    res.status(201).json({ status: 'success', data: favorite });
+    res.status(201).json({ status: 'success', data: favorite, action: 'added' });
   } catch (error) {
-    if (error.code === 11000) return res.status(400).json({ message: 'Recipe already favorited' });
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
