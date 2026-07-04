@@ -8,13 +8,13 @@ Welcome to **Recipe Hungry Point**! Discover your next favorite meal and explore
 ## Screenshots
 
 ### Homepage
-![Homepage](assets/homepage.png)
+![Homepage](./assets/homepage.png)
 
 ### Login Page
-![Login Page](assets/login_page.png)
+![Login Page](./assets/login_page.png)
 
 ### Registration Page
-![Registration Page](assets/register_page.png)
+![Registration Page](./assets/register_page.png)
 
 ## Features
 - Discover trending recipes.
