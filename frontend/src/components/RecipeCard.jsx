@@ -1,11 +1,13 @@
 import React from 'react';
-import { Clock, Users, Flame } from 'lucide-react';
+import { Clock, Users, Flame, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../services/api';
+import toast from 'react-hot-toast';
 
 const RecipeCard = ({ id, title, image, time, difficulty, calories, author }) => {
   return (
-    <Link to={`/recipe/${id}`} className="block group rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-      <div className="relative h-48 overflow-hidden">
+    <div className="block group rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 transform hover:-translate-y-1 relative">
+      <Link to={`/recipe/${id}`} className="block relative h-48 overflow-hidden">
         <img 
           src={image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} 
           alt={title} 
@@ -15,12 +17,32 @@ const RecipeCard = ({ id, title, image, time, difficulty, calories, author }) =>
           <Flame size={12} className="text-orange-500 mr-1" />
           {calories || '350'} kcal
         </div>
-      </div>
+      </Link>
       <div className="p-5">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-orange-500 transition-colors line-clamp-2">
-            {title}
-          </h3>
+          <Link to={`/recipe/${id}`} className="block">
+            <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-orange-500 transition-colors line-clamp-2">
+              {title}
+            </h3>
+          </Link>
+          <button 
+            onClick={async (e) => {
+              e.preventDefault();
+              try {
+                await api.post('/favorites', { recipeId: id });
+                toast.success('Saved to Favorites!');
+              } catch (err) {
+                if (err.response?.status === 401) {
+                  toast.error('Please login to save favorites');
+                } else {
+                  toast.error(err.response?.data?.message || 'Error saving recipe');
+                }
+              }
+            }}
+            className="text-gray-400 hover:text-red-500 transition-colors p-1"
+          >
+            <Heart size={20} />
+          </button>
         </div>
         <div className="flex items-center text-sm text-gray-500 space-x-4 mb-4 mt-3">
           <span className="flex items-center">
@@ -39,7 +61,7 @@ const RecipeCard = ({ id, title, image, time, difficulty, calories, author }) =>
           <span className="text-sm font-medium text-gray-700">{author || 'Chef Master'}</span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

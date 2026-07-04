@@ -47,14 +47,7 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          <Route 
-            path="/recipe/:id" 
-            element={
-              <ProtectedRoute>
-                <RecipeDetail />
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="/recipe/:id" element={<RecipeDetail />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>
