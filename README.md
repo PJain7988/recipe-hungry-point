@@ -8,13 +8,13 @@ Welcome to **Recipe Hungry Point**! Discover your next favorite meal and explore
 ## Screenshots
 
 ### Homepage
-![Homepage](C:\Users\Dell\.gemini\antigravity-ide\brain\480cd2d4-233d-4758-990b-ae67471c65c9\homepage_1783159502883.png)
+![Homepage](assets/homepage.png)
 
 ### Login Page
-![Login Page](C:\Users\Dell\.gemini\antigravity-ide\brain\480cd2d4-233d-4758-990b-ae67471c65c9\login_page_1783159514613.png)
+![Login Page](assets/login_page.png)
 
 ### Registration Page
-![Registration Page](C:\Users\Dell\.gemini\antigravity-ide\brain\480cd2d4-233d-4758-990b-ae67471c65c9\register_page_1783159692735.png)
+![Registration Page](assets/register_page.png)
 
 ## Features
 - Discover trending recipes.
