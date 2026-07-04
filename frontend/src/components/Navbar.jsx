@@ -52,6 +52,11 @@ const Navbar = () => {
                 <Link to="/create-recipe" className="hidden md:flex text-gray-600 hover:text-orange-500 transition-colors font-medium">
                   Publish Recipe
                 </Link>
+                {user?.role === 'admin' && (
+                  <Link to="/admin" className="hidden md:flex text-gray-600 hover:text-orange-500 transition-colors font-medium">
+                    Admin
+                  </Link>
+                )}
                 <Link to="/dashboard" className="font-medium text-sm text-gray-700 hidden md:block hover:text-orange-500 transition-colors">
                   Hi, {user?.name?.split(' ')[0] || 'Chef'}
                 </Link>

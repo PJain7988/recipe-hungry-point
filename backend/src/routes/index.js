@@ -8,6 +8,7 @@ const interactionController = require('../controllers/interactionController');
 
 // Define API routes
 router.use('/upload', require('./uploadRoutes'));
+router.use('/admin', require('./adminRoutes'));
 
 router.get('/recipes', recipeController.getAllRecipes);
 router.get('/recipes/me', protect, recipeController.getRecipesByUser);
@@ -24,6 +25,15 @@ router.get('/comments/:recipeId', interactionController.getRecipeComments);
 
 router.post('/ratings', protect, interactionController.addRating);
 router.get('/ratings/:recipeId', interactionController.getRecipeRatings);
+
+router.post('/follows', protect, interactionController.followUser);
+router.delete('/follows/:userId', protect, interactionController.unfollowUser);
+router.get('/users/:userId/followers', interactionController.getFollowers);
+router.get('/users/:userId/following', interactionController.getFollowing);
+
+router.post('/collections', protect, interactionController.createCollection);
+router.get('/collections', protect, interactionController.getUserCollections);
+router.post('/collections/add', protect, interactionController.addRecipeToCollection);
 
 // Auth routes
 router.post('/auth/register', authController.registerUser);

@@ -82,3 +82,86 @@ exports.getRecipeRatings = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: error.message });
   }
 };
+
+// --- Follows ---
+const Follow = require('../models/Follow');
+
+exports.followUser = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (req.user._id.toString() === userId) {
+      return res.status(400).json({ message: 'You cannot follow yourself' });
+    }
+    const follow = await Follow.create({ follower: req.user._id, following: userId });
+    res.status(201).json({ status: 'success', data: follow });
+  } catch (error) {
+    if (error.code === 11000) return res.status(400).json({ message: 'Already following this user' });
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+exports.unfollowUser = async (req, res) => {
+  try {
+    await Follow.findOneAndDelete({ follower: req.user._id, following: req.params.userId });
+    res.json({ status: 'success', message: 'Unfollowed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+exports.getFollowers = async (req, res) => {
+  try {
+    const followers = await Follow.find({ following: req.params.userId }).populate('follower', 'name avatar');
+    res.json({ status: 'success', data: followers });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+exports.getFollowing = async (req, res) => {
+  try {
+    const following = await Follow.find({ follower: req.params.userId }).populate('following', 'name avatar');
+    res.json({ status: 'success', data: following });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+// --- Collections ---
+const Collection = require('../models/Collection');
+
+exports.createCollection = async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ message: 'Collection name required' });
+    const collection = await Collection.create({ user: req.user._id, name, recipes: [] });
+    res.status(201).json({ status: 'success', data: collection });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+exports.getUserCollections = async (req, res) => {
+  try {
+    const collections = await Collection.find({ user: req.user._id }).populate('recipes');
+    res.json({ status: 'success', data: collections });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+exports.addRecipeToCollection = async (req, res) => {
+  try {
+    const { collectionId, recipeId } = req.body;
+    const collection = await Collection.findOne({ _id: collectionId, user: req.user._id });
+    if (!collection) return res.status(404).json({ message: 'Collection not found' });
+    
+    if (!collection.recipes.includes(recipeId)) {
+      collection.recipes.push(recipeId);
+      await collection.save();
+    }
+    res.json({ status: 'success', data: collection });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};

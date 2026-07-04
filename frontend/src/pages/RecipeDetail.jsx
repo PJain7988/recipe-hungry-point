@@ -10,7 +10,10 @@ const RecipeDetail = () => {
   const [recipe, setRecipe] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const [collections, setCollections] = useState([]);
+  const [showCollections, setShowCollections] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuthStore();
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -20,6 +23,11 @@ const RecipeDetail = () => {
         setRecipe(response.data.data);
         const commentsRes = await api.get(`/comments/${id}`);
         setComments(commentsRes.data.data || []);
+        
+        if (user) {
+          const collectionsRes = await api.get('/collections');
+          setCollections(collectionsRes.data.data || []);
+        }
       } catch (error) {
         toast.error('Failed to load recipe details');
         navigate('/recipes');
@@ -28,7 +36,7 @@ const RecipeDetail = () => {
       }
     };
     fetchRecipe();
-  }, [id, navigate]);
+  }, [id, navigate, user]);
 
   if (isLoading) {
     return (
@@ -102,12 +110,29 @@ const RecipeDetail = () => {
             </div>
 
             <div className="flex items-center text-gray-600 ml-auto">
-              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3 text-gray-500 font-bold">
-                {recipe.user?.name ? recipe.user.name.charAt(0) : 'C'}
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3 text-gray-500 font-bold overflow-hidden">
+                {recipe.user?.avatar ? <img src={recipe.user.avatar} className="w-full h-full object-cover" alt="avatar" /> : (recipe.user?.name ? recipe.user.name.charAt(0) : 'C')}
               </div>
               <div>
                 <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Author</p>
-                <p className="font-semibold">{recipe.user?.name || 'Chef Master'}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold">{recipe.user?.name || 'Chef Master'}</p>
+                  {recipe.user?._id && (
+                    <button 
+                      onClick={async () => {
+                        try {
+                          await api.post('/follows', { userId: recipe.user._id });
+                          toast.success(`Following ${recipe.user.name}!`);
+                        } catch (e) {
+                          toast.error(e.response?.data?.message || 'Error following user');
+                        }
+                      }}
+                      className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full font-bold hover:bg-orange-200 transition-colors"
+                    >
+                      Follow
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -125,21 +150,55 @@ const RecipeDetail = () => {
           </div>
           
           {/* Interaction Section */}
-          <div className="border-t border-gray-100 pt-8 mt-8 flex justify-between items-center">
-            <button 
-              onClick={async () => {
-                try {
-                  await api.post('/favorites', { recipeId: recipe._id });
-                  toast.success('Saved to Favorites!');
-                } catch (e) {
-                  toast.error(e.response?.data?.message || 'Error saving recipe');
-                }
-              }}
-              className="flex items-center text-orange-500 hover:text-white border border-orange-500 hover:bg-orange-500 font-semibold py-2 px-6 rounded-full transition-colors"
-            >
-              <Heart className="mr-2" size={20} />
-              Save Recipe
-            </button>
+          <div className="border-t border-gray-100 pt-8 mt-8 flex flex-wrap gap-4 justify-between items-center relative">
+            <div className="flex gap-4">
+              <button 
+                onClick={async () => {
+                  try {
+                    await api.post('/favorites', { recipeId: recipe._id });
+                    toast.success('Saved to Favorites!');
+                  } catch (e) {
+                    toast.error(e.response?.data?.message || 'Error saving recipe');
+                  }
+                }}
+                className="flex items-center text-orange-500 hover:text-white border border-orange-500 hover:bg-orange-500 font-semibold py-2 px-6 rounded-full transition-colors"
+              >
+                <Heart className="mr-2" size={20} />
+                Save Recipe
+              </button>
+              
+              {user && collections.length > 0 && (
+                <div className="relative">
+                  <button 
+                    onClick={() => setShowCollections(!showCollections)}
+                    className="flex items-center text-gray-600 hover:text-orange-500 border border-gray-300 hover:border-orange-500 font-semibold py-2 px-6 rounded-full transition-colors"
+                  >
+                    + Add to Collection
+                  </button>
+                  {showCollections && (
+                    <div className="absolute top-12 left-0 w-48 bg-white border border-gray-100 shadow-xl rounded-xl p-2 z-10">
+                      {collections.map(c => (
+                        <button
+                          key={c._id}
+                          onClick={async () => {
+                            try {
+                              await api.post('/collections/add', { collectionId: c._id, recipeId: recipe._id });
+                              toast.success(`Added to ${c.name}`);
+                              setShowCollections(false);
+                            } catch (e) {
+                              toast.error('Error adding to collection');
+                            }
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm hover:bg-orange-50 rounded-lg transition-colors"
+                        >
+                          {c.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <div className="flex text-orange-400">
               {[1, 2, 3, 4, 5].map((star) => (
                 <Star 
