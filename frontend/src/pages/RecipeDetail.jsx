@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Clock, Users, Flame, ChefHat, ArrowLeft, Loader2, Heart, Star, MessageSquare, List, Play, Pause, Square } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
+import useAuthStore from '../store/authStore';
 
 const RecipeDetail = () => {
   const { id } = useParams();
