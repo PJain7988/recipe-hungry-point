@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: import.meta.env.MODE === 'development' ? 'http://localhost:5000/api' : 'https://recipe-hungry-point.onrender.com/api',
 });
 
 // Request interceptor to attach JWT token

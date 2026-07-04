@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChefHat } from 'lucide-react';
+import { ChefHat, Loader2 } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
 import api from '../services/api';
@@ -8,11 +8,13 @@ import api from '../services/api';
 const Login = () => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const { data } = await api.post('/auth/login', { email, password });
       login(data);
@@ -20,6 +22,8 @@ const Login = () => {
       navigate('/');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -61,9 +65,21 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-xl transition-colors duration-300 shadow-md"
+            disabled={isLoading}
+            className={`w-full text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 shadow-md flex justify-center items-center ${
+              isLoading
+                ? 'bg-orange-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 hover:shadow-lg transform hover:-translate-y-0.5'
+            }`}
           >
-            Sign In
+            {isLoading ? (
+              <>
+                <Loader2 className="animate-spin mr-2" size={20} />
+                Signing In...
+              </>
+            ) : (
+              'Sign In'
+            )}
           </button>
         </form>
 
