@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Heart, Settings, Utensils, Loader2, Calendar } from 'lucide-react';
+import { User, Heart, Settings, Utensils, Loader2, Calendar, Search, Bell, Shield } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import api from '../services/api';
 import RecipeCard from '../components/RecipeCard';
@@ -17,7 +17,13 @@ const Dashboard = () => {
   const [settingsForm, setSettingsForm] = useState({
     name: user?.name || '',
     bio: user?.bio || '',
-    avatar: user?.avatar || ''
+    avatar: user?.avatar || '',
+    diet: 'None',
+    notifications: true
+  });
+  
+  const [mealPlan, setMealPlan] = useState({
+    Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: [], Sunday: []
   });
 
   useEffect(() => {
@@ -215,7 +221,16 @@ const Dashboard = () => {
 
           {activeTab === 'community' && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Community</h2>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Community</h2>
+                <button 
+                  onClick={() => toast.success('Discover Chefs feature coming soon!')}
+                  className="bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors flex items-center"
+                >
+                  <Search size={16} className="mr-2" />
+                  Find Chefs
+                </button>
+              </div>
               {isLoading ? (
                 <div className="flex justify-center items-center py-20">
                   <Loader2 className="animate-spin text-orange-500" size={32} />
@@ -321,9 +336,31 @@ const Dashboard = () => {
                   {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
                     <div key={day} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 min-h-[120px] flex flex-col">
                       <h4 className="font-bold text-gray-800 mb-2 border-b pb-1">{day}</h4>
-                      <div className="flex-1 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-sm text-gray-400 hover:border-orange-300 hover:bg-orange-50 transition-colors cursor-pointer">
-                        + Add Recipe
+                      
+                      <div className="space-y-2 mb-2">
+                        {mealPlan[day].map((item, idx) => (
+                          <div key={idx} className="text-xs bg-orange-100 text-orange-800 p-2 rounded-lg font-medium flex justify-between">
+                            {item}
+                            <button onClick={() => {
+                              const newPlan = {...mealPlan};
+                              newPlan[day] = newPlan[day].filter((_, i) => i !== idx);
+                              setMealPlan(newPlan);
+                            }} className="text-orange-500 hover:text-red-500">×</button>
+                          </div>
+                        ))}
                       </div>
+
+                      <button 
+                        onClick={() => {
+                          const recipe = prompt('Enter recipe name to add to ' + day + ':');
+                          if (recipe) {
+                            setMealPlan({ ...mealPlan, [day]: [...mealPlan[day], recipe] });
+                          }
+                        }}
+                        className="mt-auto border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center py-2 text-sm text-gray-400 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-500 transition-colors cursor-pointer w-full"
+                      >
+                        + Add Recipe
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -358,15 +395,56 @@ const Dashboard = () => {
                   <textarea
                     value={settingsForm.bio}
                     onChange={(e) => setSettingsForm({ ...settingsForm, bio: e.target.value })}
-                    rows="4"
+                    rows="3"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
                   ></textarea>
                 </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><Heart size={18} className="mr-2 text-orange-500"/> Preferences</h3>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Dietary Preference</label>
+                  <select
+                    value={settingsForm.diet}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, diet: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                  >
+                    <option value="None">No specific diet</option>
+                    <option value="Vegetarian">Vegetarian</option>
+                    <option value="Vegan">Vegan</option>
+                    <option value="Keto">Keto</option>
+                    <option value="Gluten-Free">Gluten-Free</option>
+                  </select>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><Bell size={18} className="mr-2 text-orange-500"/> Notifications</h3>
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settingsForm.notifications}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, notifications: e.target.checked })}
+                      className="form-checkbox h-5 w-5 text-orange-500 rounded border-gray-300 focus:ring-orange-500"
+                    />
+                    <span className="text-gray-700 font-medium">Email me when someone follows me or likes my recipe</span>
+                  </label>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center"><Shield size={18} className="mr-2 text-orange-500"/> Security</h3>
+                  <button 
+                    type="button"
+                    onClick={() => toast.success('Password reset link sent to your email!')}
+                    className="text-orange-500 font-medium hover:underline"
+                  >
+                    Change Password
+                  </button>
+                </div>
+
                 <button
                   type="submit"
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-8 rounded-xl transition-colors"
+                  className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-md transform hover:-translate-y-0.5"
                 >
-                  Save Changes
+                  Save All Changes
                 </button>
               </form>
             </div>
