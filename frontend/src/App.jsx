@@ -5,6 +5,7 @@ import MainLayout from './layouts/MainLayout'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import CreateRecipe from './pages/CreateRecipe'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -21,7 +22,7 @@ function App() {
             path="/create-recipe" 
             element={
               <ProtectedRoute>
-                <div className="text-center py-20 text-2xl font-bold">Create Recipe Page (Protected)</div>
+                <CreateRecipe />
               </ProtectedRoute>
             } 
           />

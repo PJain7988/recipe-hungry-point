@@ -1,11 +1,42 @@
-// Example controller for recipes
-exports.getAllRecipes = (req, res) => {
-  // In the future, this will fetch from MongoDB or PostgreSQL
-  res.json({
-    status: 'success',
-    data: [
-      { id: 1, name: 'Spicy Garlic Shrimp' },
-      { id: 2, name: 'Vegan Buddha Bowl' }
-    ]
-  });
+const Recipe = require('../models/Recipe');
+
+// Get all recipes
+exports.getAllRecipes = async (req, res) => {
+  try {
+    const recipes = await Recipe.find().populate('user', 'name').sort({ createdAt: -1 });
+    res.json({
+      status: 'success',
+      data: recipes
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+// Create a new recipe
+exports.createRecipe = async (req, res) => {
+  try {
+    const { title, image, time, difficulty, calories, instructions } = req.body;
+    
+    if (!title || !instructions) {
+      return res.status(400).json({ message: 'Please provide all required fields' });
+    }
+
+    const recipe = await Recipe.create({
+      title,
+      image: image || undefined, // Use schema default if empty
+      time: time || undefined,
+      difficulty: difficulty || undefined,
+      calories: calories || undefined,
+      instructions,
+      user: req.user._id // From protect middleware
+    });
+
+    res.status(201).json({
+      status: 'success',
+      data: recipe
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
 };

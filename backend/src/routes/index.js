@@ -7,6 +7,7 @@ const { protect } = require('../middlewares/authMiddleware');
 
 // Define API routes
 router.get('/recipes', recipeController.getAllRecipes);
+router.post('/recipes', protect, recipeController.createRecipe);
 
 // Auth routes
 router.post('/auth/register', authController.registerUser);
