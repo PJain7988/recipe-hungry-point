@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock, Users, Flame, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
 const RecipeCard = ({ id, title, image, time, difficulty, calories, author }) => {
+  const [isSaved, setIsSaved] = useState(false);
+
   return (
     <div className="block group rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 transform hover:-translate-y-1 relative">
       <Link to={`/recipe/${id}`} className="block relative h-48 overflow-hidden">
@@ -29,8 +31,15 @@ const RecipeCard = ({ id, title, image, time, difficulty, calories, author }) =>
             onClick={async (e) => {
               e.preventDefault();
               try {
-                await api.post('/favorites', { recipeId: id });
-                toast.success('Saved to Favorites!');
+                if (isSaved) {
+                  await api.delete(`/favorites/${id}`);
+                  setIsSaved(false);
+                  toast.success('Removed from Favorites');
+                } else {
+                  await api.post('/favorites', { recipeId: id });
+                  setIsSaved(true);
+                  toast.success('Saved to Favorites!');
+                }
               } catch (err) {
                 if (err.response?.status === 401) {
                   toast.error('Please login to save favorites');
@@ -39,9 +48,9 @@ const RecipeCard = ({ id, title, image, time, difficulty, calories, author }) =>
                 }
               }
             }}
-            className="text-gray-400 hover:text-red-500 transition-colors p-1"
+            className={`transition-colors p-1 ${isSaved ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
           >
-            <Heart size={20} />
+            <Heart size={20} fill={isSaved ? "currentColor" : "none"} />
           </button>
         </div>
         <div className="flex items-center text-sm text-gray-500 space-x-4 mb-4 mt-3">
