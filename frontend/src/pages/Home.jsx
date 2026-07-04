@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import RecipeCard from '../components/RecipeCard';
 
 const Home = () => {
@@ -78,9 +79,9 @@ const Home = () => {
           <p className="text-lg md:text-xl text-gray-100 mb-8 drop-shadow-md">
             Explore thousands of delicious recipes from around the world. Let's make something amazing today!
           </p>
-          <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+          <Link to="/recipes" className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
             Explore Recipes
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -90,10 +91,10 @@ const Home = () => {
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Trending Recipes</h2>
           <p className="text-gray-500">Most popular choices from our community.</p>
         </div>
-        <button className="text-orange-500 hover:text-orange-600 font-semibold flex items-center group">
+        <Link to="/recipes" className="text-orange-500 hover:text-orange-600 font-semibold flex items-center group">
           View All 
           <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
-        </button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">

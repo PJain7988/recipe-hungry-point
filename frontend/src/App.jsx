@@ -6,6 +6,8 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import CreateRecipe from './pages/CreateRecipe'
+import RecipeDetail from './pages/RecipeDetail'
+import Recipes from './pages/Recipes'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -15,6 +17,7 @@ function App() {
       <MainLayout>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/recipes" element={<Recipes />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           {/* Example of a protected route */}
@@ -23,6 +26,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreateRecipe />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/recipe/:id" 
+            element={
+              <ProtectedRoute>
+                <RecipeDetail />
               </ProtectedRoute>
             } 
           />

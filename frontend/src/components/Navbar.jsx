@@ -25,26 +25,33 @@ const Navbar = () => {
             </span>
           </Link>
 
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
+          <form 
+            className="hidden md:flex flex-1 max-w-md mx-8"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const query = e.target.search.value.trim();
+              if (query) navigate(`/recipes?search=${encodeURIComponent(query)}`);
+            }}
+          >
             <div className="relative w-full">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
               </div>
               <input
+                name="search"
                 type="text"
                 className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-full leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-orange-500 focus:border-orange-500 sm:text-sm transition-shadow duration-300 shadow-sm hover:shadow-md"
                 placeholder="Search recipes, ingredients..."
               />
             </div>
-          </div>
+          </form>
 
           <div className="flex items-center space-x-4">
-            <Link to="/create-recipe" className="hidden md:flex text-gray-600 hover:text-orange-500 transition-colors font-medium">
-              Create Recipe
-            </Link>
-            
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
+                <Link to="/create-recipe" className="hidden md:flex text-gray-600 hover:text-orange-500 transition-colors font-medium">
+                  Publish Recipe
+                </Link>
                 <span className="font-medium text-sm text-gray-700 hidden md:block">
                   Hi, {user?.name?.split(' ')[0] || 'Chef'}
                 </span>

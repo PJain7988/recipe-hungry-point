@@ -13,6 +13,22 @@ exports.getAllRecipes = async (req, res) => {
   }
 };
 
+// Get single recipe by ID
+exports.getRecipeById = async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id).populate('user', 'name');
+    if (!recipe) {
+      return res.status(404).json({ message: 'Recipe not found' });
+    }
+    res.json({
+      status: 'success',
+      data: recipe
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
 // Create a new recipe
 exports.createRecipe = async (req, res) => {
   try {

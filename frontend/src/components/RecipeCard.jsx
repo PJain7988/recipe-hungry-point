@@ -1,9 +1,10 @@
 import React from 'react';
 import { Clock, Users, Flame } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const RecipeCard = ({ title, image, time, difficulty, calories, author }) => {
+const RecipeCard = ({ id, title, image, time, difficulty, calories, author }) => {
   return (
-    <div className="group rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
+    <Link to={`/recipe/${id}`} className="block group rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
       <div className="relative h-48 overflow-hidden">
         <img 
           src={image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} 
@@ -38,7 +39,7 @@ const RecipeCard = ({ title, image, time, difficulty, calories, author }) => {
           <span className="text-sm font-medium text-gray-700">{author || 'Chef Master'}</span>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
