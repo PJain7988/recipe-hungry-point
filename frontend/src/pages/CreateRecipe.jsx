@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Utensils, Image as ImageIcon, Clock, Flame, Activity, FileText, Loader2 } from 'lucide-react';
+import { Utensils, Image as ImageIcon, Clock, Flame, Activity, FileText, Loader2, List, Tag } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 
@@ -13,6 +13,8 @@ const CreateRecipe = () => {
     time: '',
     difficulty: 'Easy',
     calories: '',
+    category: 'Other',
+    tags: '',
     instructions: ''
   });
 
@@ -25,7 +27,11 @@ const CreateRecipe = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await api.post('/recipes', formData);
+      const payload = {
+        ...formData,
+        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+      };
+      await api.post('/recipes', payload);
       toast.success('Recipe created successfully!');
       navigate('/');
     } catch (error) {
@@ -115,6 +121,50 @@ const CreateRecipe = () => {
               </div>
             </div>
 
+            {/* Category */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <div className="relative">
+                <List className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all appearance-none bg-white"
+                >
+                  <option value="Breakfast">Breakfast</option>
+                  <option value="Lunch">Lunch</option>
+                  <option value="Dinner">Dinner</option>
+                  <option value="Snacks">Snacks</option>
+                  <option value="Desserts">Desserts</option>
+                  <option value="Drinks">Drinks</option>
+                  <option value="Vegan">Vegan</option>
+                  <option value="Vegetarian">Vegetarian</option>
+                  <option value="Indian">Indian</option>
+                  <option value="Chinese">Chinese</option>
+                  <option value="Italian">Italian</option>
+                  <option value="Mexican">Mexican</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tags (comma separated)</label>
+              <div className="relative">
+                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="text"
+                  name="tags"
+                  value={formData.tags}
+                  onChange={handleChange}
+                  placeholder="e.g., spicy, quick, healthy"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                />
+              </div>
+            </div>
+
             {/* Calories */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Calories (kcal)</label>
@@ -131,8 +181,7 @@ const CreateRecipe = () => {
               </div>
             </div>
 
-            {/* Empty space for grid alignment */}
-            <div className="hidden md:block"></div>
+
 
             {/* Instructions */}
             <div className="md:col-span-2">

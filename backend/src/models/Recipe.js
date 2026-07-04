@@ -17,15 +17,25 @@ const recipeSchema = mongoose.Schema(
     },
     time: {
       type: String,
-      default: '30 min',
+      required: [true, 'Please add preparation time'],
     },
     difficulty: {
       type: String,
-      default: 'Medium',
+      required: [true, 'Please add difficulty level'],
+      enum: ['Easy', 'Medium', 'Hard'],
     },
     calories: {
       type: String,
-      default: '400',
+      required: [true, 'Please add calories'],
+    },
+    category: {
+      type: String,
+      enum: ['Breakfast', 'Lunch', 'Dinner', 'Snacks', 'Desserts', 'Drinks', 'Vegan', 'Vegetarian', 'Indian', 'Chinese', 'Italian', 'Mexican', 'Other'],
+      default: 'Other',
+    },
+    tags: {
+      type: [String],
+      default: [],
     },
     instructions: {
       type: String,

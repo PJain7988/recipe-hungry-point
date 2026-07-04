@@ -3,7 +3,20 @@ const Recipe = require('../models/Recipe');
 // Get all recipes
 exports.getAllRecipes = async (req, res) => {
   try {
-    const recipes = await Recipe.find().populate('user', 'name').sort({ createdAt: -1 });
+    const { search, category, difficulty } = req.query;
+    let query = {};
+    
+    if (search) {
+      query.title = { $regex: search, $options: 'i' };
+    }
+    if (category) {
+      query.category = category;
+    }
+    if (difficulty) {
+      query.difficulty = difficulty;
+    }
+
+    const recipes = await Recipe.find(query).populate('user', 'name').sort({ createdAt: -1 });
     res.json({
       status: 'success',
       data: recipes
@@ -32,7 +45,7 @@ exports.getRecipeById = async (req, res) => {
 // Create a new recipe
 exports.createRecipe = async (req, res) => {
   try {
-    const { title, image, time, difficulty, calories, instructions } = req.body;
+    const { title, image, time, difficulty, calories, instructions, category, tags } = req.body;
     
     if (!title || !instructions) {
       return res.status(400).json({ message: 'Please provide all required fields' });
@@ -44,6 +57,8 @@ exports.createRecipe = async (req, res) => {
       time: time || undefined,
       difficulty: difficulty || undefined,
       calories: calories || undefined,
+      category: category || undefined,
+      tags: tags || [],
       instructions,
       user: req.user._id // From protect middleware
     });
@@ -51,6 +66,19 @@ exports.createRecipe = async (req, res) => {
     res.status(201).json({
       status: 'success',
       data: recipe
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
+  }
+};
+
+// Get recipes by logged in user
+exports.getRecipesByUser = async (req, res) => {
+  try {
+    const recipes = await Recipe.find({ user: req.user._id }).sort({ createdAt: -1 });
+    res.json({
+      status: 'success',
+      data: recipes
     });
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });

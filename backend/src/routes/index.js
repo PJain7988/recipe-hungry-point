@@ -10,6 +10,7 @@ const interactionController = require('../controllers/interactionController');
 router.use('/upload', require('./uploadRoutes'));
 
 router.get('/recipes', recipeController.getAllRecipes);
+router.get('/recipes/me', protect, recipeController.getRecipesByUser);
 router.get('/recipes/:id', recipeController.getRecipeById);
 router.post('/recipes', protect, recipeController.createRecipe);
 
@@ -28,5 +29,6 @@ router.get('/ratings/:recipeId', interactionController.getRecipeRatings);
 router.post('/auth/register', authController.registerUser);
 router.post('/auth/login', authController.loginUser);
 router.get('/auth/me', protect, authController.getMe);
+router.put('/auth/profile', protect, authController.updateProfile);
 
 module.exports = router;

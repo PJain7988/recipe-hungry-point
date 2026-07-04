@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, Users, Flame, ChefHat, ArrowLeft, Loader2, Heart, Star } from 'lucide-react';
+import { Clock, Users, Flame, ChefHat, ArrowLeft, Loader2, Heart, Star, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 
@@ -8,6 +8,8 @@ const RecipeDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [recipe, setRecipe] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -16,6 +18,8 @@ const RecipeDetail = () => {
         // We will need a GET /api/recipes/:id endpoint on the backend
         const response = await api.get(`/recipes/${id}`);
         setRecipe(response.data.data);
+        const commentsRes = await api.get(`/comments/${id}`);
+        setComments(commentsRes.data.data || []);
       } catch (error) {
         toast.error('Failed to load recipe details');
         navigate('/recipes');
@@ -35,6 +39,20 @@ const RecipeDetail = () => {
   }
 
   if (!recipe) return null;
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+    
+    try {
+      const res = await api.post('/comments', { recipeId: recipe._id, text: newComment });
+      setComments([res.data.data, ...comments]);
+      setNewComment('');
+      toast.success('Comment added!');
+    } catch (e) {
+      toast.error('Failed to add comment');
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -138,6 +156,53 @@ const RecipeDetail = () => {
                   }}
                 />
               ))}
+            </div>
+          </div>
+
+          {/* Comments Section */}
+          <div className="border-t border-gray-100 pt-8 mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+              <MessageSquare className="mr-3 text-orange-500" size={28} />
+              Comments ({comments.length})
+            </h2>
+            
+            <form onSubmit={handleAddComment} className="mb-8 relative">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Leave a comment..."
+                className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none h-24"
+              ></textarea>
+              <button 
+                type="submit"
+                className="absolute bottom-4 right-4 bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-2 rounded-xl transition-colors"
+              >
+                Post
+              </button>
+            </form>
+
+            <div className="space-y-6">
+              {comments.map((comment) => (
+                <div key={comment._id} className="flex gap-4">
+                  <img 
+                    src={comment.user?.avatar || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} 
+                    alt="User" 
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div className="bg-gray-50 rounded-2xl p-4 flex-1">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-bold text-gray-900">{comment.user?.name || 'User'}</h4>
+                      <span className="text-xs text-gray-400">
+                        {new Date(comment.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-gray-600">{comment.text}</p>
+                  </div>
+                </div>
+              ))}
+              {comments.length === 0 && (
+                <p className="text-gray-500 text-center py-4">No comments yet. Be the first to share your thoughts!</p>
+              )}
             </div>
           </div>
         </div>

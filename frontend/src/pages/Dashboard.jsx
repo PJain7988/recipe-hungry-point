@@ -6,13 +6,20 @@ import RecipeCard from '../components/RecipeCard';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
-  const { user } = useAuthStore();
+  const { user, login } = useAuthStore();
   const [activeTab, setActiveTab] = useState('favorites');
   const [favorites, setFavorites] = useState([]);
+  const [myRecipes, setMyRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [settingsForm, setSettingsForm] = useState({
+    name: user?.name || '',
+    bio: user?.bio || '',
+    avatar: user?.avatar || ''
+  });
 
   useEffect(() => {
     const fetchFavorites = async () => {
+      setIsLoading(true);
       try {
         const response = await api.get('/favorites');
         setFavorites(response.data.data.map(f => f.recipe));
@@ -22,10 +29,33 @@ const Dashboard = () => {
         setIsLoading(false);
       }
     };
-    if (activeTab === 'favorites') {
-      fetchFavorites();
-    }
+    
+    const fetchMyRecipes = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get('/recipes/me');
+        setMyRecipes(response.data.data);
+      } catch (error) {
+        toast.error('Failed to load your recipes');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (activeTab === 'favorites') fetchFavorites();
+    if (activeTab === 'recipes') fetchMyRecipes();
   }, [activeTab]);
+
+  const handleSettingsUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await api.put('/auth/profile', settingsForm);
+      login(res.data); // Update auth store with new user data
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update profile');
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -95,14 +125,62 @@ const Dashboard = () => {
           {activeTab === 'recipes' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">My Published Recipes</h2>
-              <p className="text-gray-500">Feature coming soon in Phase 2.</p>
+              {isLoading ? (
+                <div className="flex justify-center items-center py-20">
+                  <Loader2 className="animate-spin text-orange-500" size={32} />
+                </div>
+              ) : myRecipes.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                  {myRecipes.map((recipe) => (
+                    <RecipeCard key={recipe._id} id={recipe._id} {...recipe} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20">
+                  <p className="text-gray-500">You haven't published any recipes yet.</p>
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === 'settings' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Account Settings</h2>
-              <p className="text-gray-500">Profile updates coming soon in Phase 2.</p>
+              <form onSubmit={handleSettingsUpdate} className="space-y-6 max-w-lg">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                  <input
+                    type="text"
+                    value={settingsForm.name}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, name: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Avatar URL</label>
+                  <input
+                    type="text"
+                    value={settingsForm.avatar}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, avatar: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                  <textarea
+                    value={settingsForm.bio}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, bio: e.target.value })}
+                    rows="4"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                  ></textarea>
+                </div>
+                <button
+                  type="submit"
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-8 rounded-xl transition-colors"
+                >
+                  Save Changes
+                </button>
+              </form>
             </div>
           )}
         </div>
