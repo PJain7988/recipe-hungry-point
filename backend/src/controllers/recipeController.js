@@ -30,6 +30,10 @@ exports.getAllRecipes = async (req, res) => {
 // Get single recipe by ID
 exports.getRecipeById = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Invalid Recipe ID format' });
+    }
     const recipe = await Recipe.findById(req.params.id).populate('user', 'name');
     if (!recipe) {
       return res.status(404).json({ message: 'Recipe not found' });

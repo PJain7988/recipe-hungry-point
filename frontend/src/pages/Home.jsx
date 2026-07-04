@@ -1,64 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import RecipeCard from '../components/RecipeCard';
+import api from '../services/api';
+import { Loader2 } from 'lucide-react';
 
 const Home = () => {
-  const dummyRecipes = [
-    {
-      id: 1,
-      title: "Spicy Garlic Butter Shrimp",
-      image: "https://images.unsplash.com/photo-1625943555419-56a2cb596640?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      time: "20 min",
-      difficulty: "Easy",
-      calories: "450",
-      author: "Chef Gordon"
-    },
-    {
-      id: 2,
-      title: "Creamy Tomato Basil Pasta",
-      image: "https://images.unsplash.com/photo-1621996316524-70659610f7a0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      time: "35 min",
-      difficulty: "Medium",
-      calories: "620",
-      author: "Maria Rossi"
-    },
-    {
-      id: 3,
-      title: "Grilled Lemon Herb Chicken",
-      image: "https://images.unsplash.com/photo-1598514982205-f36b96d1e8d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      time: "45 min",
-      difficulty: "Medium",
-      calories: "380",
-      author: "John Doe"
-    },
-    {
-      id: 4,
-      title: "Vegan Buddha Bowl",
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      time: "15 min",
-      difficulty: "Easy",
-      calories: "320",
-      author: "Sarah Green"
-    },
-    {
-      id: 5,
-      title: "Classic Beef Burger",
-      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      time: "30 min",
-      difficulty: "Medium",
-      calories: "850",
-      author: "Mike Grill"
-    },
-    {
-      id: 6,
-      title: "Fresh Summer Salad",
-      image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      time: "10 min",
-      difficulty: "Easy",
-      calories: "210",
-      author: "Emma Leaf"
-    }
-  ];
+  const [recipes, setRecipes] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await api.get('/recipes');
+        // Get the latest 6 recipes for the home page
+        setRecipes(response.data.data.slice(0, 6));
+      } catch (error) {
+        console.error('Failed to fetch recipes:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchRecipes();
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -97,11 +60,17 @@ const Home = () => {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {dummyRecipes.map((recipe) => (
-          <RecipeCard key={recipe.id} {...recipe} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="animate-spin text-orange-500" size={40} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {recipes.map((recipe) => (
+            <RecipeCard key={recipe._id} id={recipe._id} {...recipe} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
