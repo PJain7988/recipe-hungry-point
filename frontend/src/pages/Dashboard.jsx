@@ -25,6 +25,9 @@ const Dashboard = () => {
   const [mealPlan, setMealPlan] = useState({
     Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: [], Sunday: []
   });
+  const [showRecipeModal, setShowRecipeModal] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -322,8 +325,32 @@ const Dashboard = () => {
             <div>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Weekly Meal Planner</h2>
-                <button className="bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors">
-                  Generate with AI
+                <button 
+                  onClick={() => {
+                    setIsGenerating(true);
+                    setTimeout(() => {
+                      const allRecipes = [...favorites, ...myRecipes];
+                      if (allRecipes.length === 0) {
+                        toast.error('Add some recipes to your favorites first!');
+                        setIsGenerating(false);
+                        return;
+                      }
+                      const newPlan = { Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: [], Sunday: [] };
+                      const days = Object.keys(newPlan);
+                      days.forEach(day => {
+                        const randomRecipe = allRecipes[Math.floor(Math.random() * allRecipes.length)];
+                        newPlan[day] = [randomRecipe.title];
+                      });
+                      setMealPlan(newPlan);
+                      setIsGenerating(false);
+                      toast.success('AI successfully generated your meal plan!');
+                    }, 2000);
+                  }}
+                  disabled={isGenerating}
+                  className="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:from-orange-600 hover:to-amber-600 transition-all flex items-center disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isGenerating ? <Loader2 size={16} className="animate-spin mr-2" /> : <Calendar size={16} className="mr-2" />}
+                  {isGenerating ? 'Generating...' : 'Generate with AI'}
                 </button>
               </div>
               
@@ -352,10 +379,8 @@ const Dashboard = () => {
 
                       <button 
                         onClick={() => {
-                          const recipe = prompt('Enter recipe name to add to ' + day + ':');
-                          if (recipe) {
-                            setMealPlan({ ...mealPlan, [day]: [...mealPlan[day], recipe] });
-                          }
+                          setSelectedDay(day);
+                          setShowRecipeModal(true);
                         }}
                         className="mt-auto border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center py-2 text-sm text-gray-400 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-500 transition-colors cursor-pointer w-full"
                       >
@@ -365,6 +390,36 @@ const Dashboard = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Add Recipe Modal */}
+              {showRecipeModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-3xl w-full max-w-md p-6 max-h-[80vh] flex flex-col">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-xl font-bold">Add to {selectedDay}</h3>
+                      <button onClick={() => setShowRecipeModal(false)} className="text-gray-400 hover:text-gray-600">×</button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto space-y-2">
+                      <h4 className="text-sm font-bold text-gray-500 mb-2">From Your Favorites</h4>
+                      {favorites.length === 0 && <p className="text-sm text-gray-400 italic">No favorites yet.</p>}
+                      {favorites.map(fav => (
+                        <button 
+                          key={fav._id}
+                          onClick={() => {
+                            setMealPlan({ ...mealPlan, [selectedDay]: [...mealPlan[selectedDay], fav.title] });
+                            setShowRecipeModal(false);
+                            toast.success(`Added to ${selectedDay}`);
+                          }}
+                          className="w-full text-left p-3 bg-gray-50 hover:bg-orange-50 rounded-xl transition-colors font-medium text-gray-700 text-sm flex items-center gap-3"
+                        >
+                          <img src={fav.image} alt={fav.title} className="w-10 h-10 rounded-lg object-cover" />
+                          {fav.title}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
