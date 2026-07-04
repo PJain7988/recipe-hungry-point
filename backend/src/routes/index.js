@@ -28,6 +28,7 @@ router.get('/ratings/:recipeId', interactionController.getRecipeRatings);
 
 router.post('/follows', protect, interactionController.followUser);
 router.delete('/follows/:userId', protect, interactionController.unfollowUser);
+router.get('/users', authController.getAllUsers);
 router.get('/users/:userId/followers', interactionController.getFollowers);
 router.get('/users/:userId/following', interactionController.getFollowing);
 

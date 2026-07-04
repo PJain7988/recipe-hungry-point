@@ -26,6 +26,8 @@ const Dashboard = () => {
     Monday: [], Tuesday: [], Wednesday: [], Thursday: [], Friday: [], Saturday: [], Sunday: []
   });
   const [showRecipeModal, setShowRecipeModal] = useState(false);
+  const [showChefsModal, setShowChefsModal] = useState(false);
+  const [allChefs, setAllChefs] = useState([]);
   const [selectedDay, setSelectedDay] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -227,7 +229,15 @@ const Dashboard = () => {
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Community</h2>
                 <button 
-                  onClick={() => toast.success('Discover Chefs feature coming soon!')}
+                  onClick={async () => {
+                    try {
+                      const res = await api.get('/users');
+                      setAllChefs(res.data.data.filter(c => c._id !== user._id));
+                      setShowChefsModal(true);
+                    } catch (e) {
+                      toast.error('Failed to load chefs');
+                    }
+                  }}
                   className="bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors flex items-center"
                 >
                   <Search size={16} className="mr-2" />
@@ -262,6 +272,53 @@ const Dashboard = () => {
                         </div>
                       ))}
                       {followers.length === 0 && <p className="text-gray-500 text-sm">No followers yet.</p>}
+                    </div>
+                    </div>
+                  </div>
+              )}
+
+              {/* Find Chefs Modal */}
+              {showChefsModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                  <div className="bg-white rounded-3xl w-full max-w-md p-6 max-h-[80vh] flex flex-col">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-xl font-bold">Discover Chefs</h3>
+                      <button onClick={() => setShowChefsModal(false)} className="text-gray-400 hover:text-gray-600">×</button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto space-y-4">
+                      {allChefs.length === 0 && <p className="text-sm text-gray-400 italic">No other chefs found.</p>}
+                      {allChefs.map(chef => (
+                        <div key={chef._id} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <img src={chef.avatar || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} alt={chef.name} className="w-10 h-10 rounded-full object-cover" />
+                            <div>
+                              <p className="font-bold text-sm">{chef.name}</p>
+                              <p className="text-xs text-orange-500 font-medium">Level {chef.level || 1} • {chef.xp || 0} XP</p>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={async () => {
+                              try {
+                                await api.post('/follows', { userId: chef._id });
+                                toast.success(`Following ${chef.name}!`);
+                                setShowChefsModal(false);
+                                // Refresh follow data
+                                const [followersRes, followingRes] = await Promise.all([
+                                  api.get(`/users/${user._id}/followers`),
+                                  api.get(`/users/${user._id}/following`)
+                                ]);
+                                setFollowers(followersRes.data.data);
+                                setFollowing(followingRes.data.data);
+                              } catch (e) {
+                                toast.error('Already following or error');
+                              }
+                            }}
+                            className="bg-orange-100 text-orange-600 text-xs font-bold px-3 py-1.5 rounded-full hover:bg-orange-200 transition-colors"
+                          >
+                            Follow
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>

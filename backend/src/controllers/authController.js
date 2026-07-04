@@ -121,3 +121,15 @@ exports.updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find({}, '-password').sort({ xp: -1 }).limit(20);
+    res.json({
+      status: 'success',
+      data: users
+    });
+  } catch (error) {
+    next(error);
+  }
+};
