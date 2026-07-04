@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, Users, Flame, ChefHat, ArrowLeft, Loader2 } from 'lucide-react';
+import { Clock, Users, Flame, ChefHat, ArrowLeft, Loader2, Heart, Star } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 
@@ -99,9 +99,44 @@ const RecipeDetail = () => {
               <ChefHat className="mr-3 text-orange-500" size={28} />
               Instructions
             </h2>
-            <div className="prose prose-orange max-w-none">
+            <div className="prose prose-orange max-w-none mb-12">
               {recipe.instructions.split('\n').map((paragraph, index) => (
                 paragraph.trim() ? <p key={index} className="text-gray-600 leading-relaxed mb-4">{paragraph}</p> : null
+              ))}
+            </div>
+          </div>
+          
+          {/* Interaction Section */}
+          <div className="border-t border-gray-100 pt-8 mt-8 flex justify-between items-center">
+            <button 
+              onClick={async () => {
+                try {
+                  await api.post('/favorites', { recipeId: recipe._id });
+                  toast.success('Saved to Favorites!');
+                } catch (e) {
+                  toast.error(e.response?.data?.message || 'Error saving recipe');
+                }
+              }}
+              className="flex items-center text-orange-500 hover:text-white border border-orange-500 hover:bg-orange-500 font-semibold py-2 px-6 rounded-full transition-colors"
+            >
+              <Heart className="mr-2" size={20} />
+              Save Recipe
+            </button>
+            <div className="flex text-orange-400">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star 
+                  key={star} 
+                  size={24} 
+                  className="cursor-pointer hover:fill-orange-400 transition-colors"
+                  onClick={async () => {
+                    try {
+                      await api.post('/ratings', { recipeId: recipe._id, stars: star });
+                      toast.success('Rating submitted!');
+                    } catch (e) {
+                      toast.error('Error submitting rating');
+                    }
+                  }}
+                />
               ))}
             </div>
           </div>

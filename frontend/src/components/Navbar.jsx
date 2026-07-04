@@ -52,9 +52,9 @@ const Navbar = () => {
                 <Link to="/create-recipe" className="hidden md:flex text-gray-600 hover:text-orange-500 transition-colors font-medium">
                   Publish Recipe
                 </Link>
-                <span className="font-medium text-sm text-gray-700 hidden md:block">
+                <Link to="/dashboard" className="font-medium text-sm text-gray-700 hidden md:block hover:text-orange-500 transition-colors">
                   Hi, {user?.name?.split(' ')[0] || 'Chef'}
-                </span>
+                </Link>
                 <button 
                   onClick={handleLogout}
                   className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-red-100 hover:text-red-600 transition-colors text-gray-600"
