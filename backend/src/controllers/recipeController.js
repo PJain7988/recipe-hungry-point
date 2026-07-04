@@ -1,4 +1,5 @@
 const Recipe = require('../models/Recipe');
+const { awardXP } = require('../utils/gamification');
 
 // Get all recipes
 exports.getAllRecipes = async (req, res) => {
@@ -45,7 +46,7 @@ exports.getRecipeById = async (req, res) => {
 // Create a new recipe
 exports.createRecipe = async (req, res) => {
   try {
-    const { title, image, time, difficulty, calories, instructions, category, tags } = req.body;
+    const { title, image, time, difficulty, calories, instructions, category, tags, ingredients } = req.body;
     
     if (!title || !instructions) {
       return res.status(400).json({ message: 'Please provide all required fields' });
@@ -59,9 +60,13 @@ exports.createRecipe = async (req, res) => {
       calories: calories || undefined,
       category: category || undefined,
       tags: tags || [],
+      ingredients: ingredients || [],
       instructions,
       user: req.user._id // From protect middleware
     });
+
+    // Award XP for creating a recipe
+    await awardXP(req.user._id, 50);
 
     res.status(201).json({
       status: 'success',

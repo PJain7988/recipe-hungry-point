@@ -57,8 +57,13 @@ const Navbar = () => {
                     Admin
                   </Link>
                 )}
-                <Link to="/dashboard" className="font-medium text-sm text-gray-700 hidden md:block hover:text-orange-500 transition-colors">
-                  Hi, {user?.name?.split(' ')[0] || 'Chef'}
+                <Link to="/dashboard" className="hidden md:flex items-center gap-2 text-sm text-gray-700 hover:text-orange-500 transition-colors">
+                  <div className="flex flex-col text-right">
+                    <span className="font-bold">Hi, {user?.name?.split(' ')[0] || 'Chef'}</span>
+                    {user?.level !== undefined && (
+                      <span className="text-xs text-orange-500 font-bold">Lvl {user.level} • {user.xp} XP</span>
+                    )}
+                  </div>
                 </Link>
                 <button 
                   onClick={handleLogout}

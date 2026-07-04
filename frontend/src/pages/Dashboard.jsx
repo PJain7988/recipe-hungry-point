@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Heart, Settings, Utensils, Loader2 } from 'lucide-react';
+import { User, Heart, Settings, Utensils, Loader2, Calendar } from 'lucide-react';
 import useAuthStore from '../store/authStore';
 import api from '../services/api';
 import RecipeCard from '../components/RecipeCard';
@@ -100,10 +100,26 @@ const Dashboard = () => {
               <img 
                 src={user?.avatar || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'} 
                 alt="Profile" 
-                className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+                className="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-4 border-orange-100"
               />
               <h2 className="text-xl font-bold text-gray-900">{user?.name}</h2>
-              <p className="text-sm text-gray-500">{user?.role === 'admin' ? 'Administrator' : 'Home Chef'}</p>
+              <p className="text-sm text-gray-500 mb-4">{user?.role === 'admin' ? 'Administrator' : 'Home Chef'}</p>
+              
+              {user?.level !== undefined && (
+                <div className="bg-orange-50 rounded-xl p-3 mb-6">
+                  <div className="flex justify-between text-sm font-bold text-orange-600 mb-1">
+                    <span>Level {user.level}</span>
+                    <span>{user.xp} XP</span>
+                  </div>
+                  <div className="w-full bg-orange-200 rounded-full h-2">
+                    <div 
+                      className="bg-orange-500 h-2 rounded-full" 
+                      style={{ width: `${(user.xp % 100)}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-orange-400 mt-2 text-left">{100 - (user.xp % 100)} XP to next level</p>
+                </div>
+              )}
             </div>
             
             <nav className="space-y-2">
@@ -134,6 +150,13 @@ const Dashboard = () => {
               >
                 <Heart size={18} className="mr-3" />
                 Collections
+              </button>
+              <button 
+                onClick={() => setActiveTab('mealplan')}
+                className={`w-full flex items-center px-4 py-3 rounded-xl transition-colors ${activeTab === 'mealplan' ? 'bg-orange-50 text-orange-500 font-medium' : 'text-gray-600 hover:bg-gray-50'}`}
+              >
+                <Calendar size={18} className="mr-3" />
+                Meal Planner
               </button>
               <button 
                 onClick={() => setActiveTab('settings')}
@@ -277,6 +300,34 @@ const Dashboard = () => {
                   <p className="text-gray-500 mb-4">You don't have any collections.</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === 'mealplan' && (
+            <div>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Weekly Meal Planner</h2>
+                <button className="bg-orange-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors">
+                  Generate with AI
+                </button>
+              </div>
+              
+              <div className="bg-orange-50 rounded-2xl p-8 text-center border border-orange-100">
+                <Calendar size={48} className="mx-auto text-orange-400 mb-4" />
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Plan Your Meals</h3>
+                <p className="text-gray-600 max-w-md mx-auto mb-6">Drag and drop your favorite recipes here to create your weekly meal plan, or let our AI generate one for you based on your preferences.</p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                  {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => (
+                    <div key={day} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 min-h-[120px] flex flex-col">
+                      <h4 className="font-bold text-gray-800 mb-2 border-b pb-1">{day}</h4>
+                      <div className="flex-1 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center text-sm text-gray-400 hover:border-orange-300 hover:bg-orange-50 transition-colors cursor-pointer">
+                        + Add Recipe
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 

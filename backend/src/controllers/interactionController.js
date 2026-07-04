@@ -2,6 +2,7 @@ const Favorite = require('../models/Favorite');
 const Comment = require('../models/Comment');
 const Rating = require('../models/Rating');
 const Recipe = require('../models/Recipe');
+const { awardXP } = require('../utils/gamification');
 
 // --- Favorites ---
 exports.addFavorite = async (req, res) => {
@@ -39,6 +40,10 @@ exports.addComment = async (req, res) => {
     const { recipeId, text } = req.body;
     const comment = await Comment.create({ user: req.user._id, recipe: recipeId, text });
     await comment.populate('user', 'name avatar');
+    
+    // Award XP for commenting
+    await awardXP(req.user._id, 10);
+    
     res.status(201).json({ status: 'success', data: comment });
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });
@@ -67,6 +72,10 @@ exports.addRating = async (req, res) => {
       return res.json({ status: 'success', data: existingRating });
     }
     const rating = await Rating.create({ user: req.user._id, recipe: recipeId, stars });
+    
+    // Award XP for rating
+    await awardXP(req.user._id, 5);
+    
     res.status(201).json({ status: 'success', data: rating });
   } catch (error) {
     res.status(500).json({ message: 'Server Error', error: error.message });

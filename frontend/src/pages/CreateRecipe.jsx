@@ -15,6 +15,7 @@ const CreateRecipe = () => {
     calories: '',
     category: 'Other',
     tags: '',
+    ingredients: '',
     instructions: ''
   });
 
@@ -29,7 +30,8 @@ const CreateRecipe = () => {
     try {
       const payload = {
         ...formData,
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        ingredients: formData.ingredients.split('\n').map(i => i.trim()).filter(i => i)
       };
       await api.post('/recipes', payload);
       toast.success('Recipe created successfully!');
@@ -182,6 +184,23 @@ const CreateRecipe = () => {
             </div>
 
 
+
+            {/* Ingredients */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Ingredients <span className="text-red-500">*</span> <span className="text-xs text-gray-500">(One ingredient per line)</span></label>
+              <div className="relative">
+                <List className="absolute left-3 top-4 text-gray-400" size={18} />
+                <textarea
+                  name="ingredients"
+                  required
+                  rows="4"
+                  value={formData.ingredients}
+                  onChange={handleChange}
+                  placeholder="2 cups flour&#10;1 tsp salt&#10;1 cup water"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all resize-none"
+                ></textarea>
+              </div>
+            </div>
 
             {/* Instructions */}
             <div className="md:col-span-2">

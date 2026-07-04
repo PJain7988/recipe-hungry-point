@@ -34,6 +34,12 @@ exports.registerUser = async (req, res, next) => {
         _id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        bio: user.bio,
+        xp: user.xp,
+        level: user.level,
+        badges: user.badges,
         token: generateToken(user._id),
       });
     } else {
@@ -56,6 +62,12 @@ exports.loginUser = async (req, res, next) => {
         _id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        bio: user.bio,
+        xp: user.xp,
+        level: user.level,
+        badges: user.badges,
         token: generateToken(user._id),
       });
     } else {
@@ -100,6 +112,9 @@ exports.updateProfile = async (req, res, next) => {
       bio: updatedUser.bio,
       avatar: updatedUser.avatar,
       role: updatedUser.role,
+      xp: updatedUser.xp,
+      level: updatedUser.level,
+      badges: updatedUser.badges,
       token: generateToken(updatedUser._id),
     });
   } catch (error) {

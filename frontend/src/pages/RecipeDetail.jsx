@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, Users, Flame, ChefHat, ArrowLeft, Loader2, Heart, Star, MessageSquare } from 'lucide-react';
+import { Clock, Users, Flame, ChefHat, ArrowLeft, Loader2, Heart, Star, MessageSquare, List, Play, Pause, Square } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 
@@ -12,6 +12,9 @@ const RecipeDetail = () => {
   const [newComment, setNewComment] = useState('');
   const [collections, setCollections] = useState([]);
   const [showCollections, setShowCollections] = useState(false);
+  const [servingsMultiplier, setServingsMultiplier] = useState(1);
+  const [timerActive, setTimerActive] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuthStore();
 
@@ -37,6 +40,23 @@ const RecipeDetail = () => {
     };
     fetchRecipe();
   }, [id, navigate, user]);
+
+  useEffect(() => {
+    let interval = null;
+    if (timerActive && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds(s => s - 1);
+      }, 1000);
+    } else if (timerSeconds === 0 && timerActive) {
+      setTimerActive(false);
+      toast.success('Timer finished! 🍳', { duration: 5000 });
+      // Play a sound if possible (browser restrictions apply)
+      try {
+        new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(() => {});
+      } catch (e) {}
+    }
+    return () => clearInterval(interval);
+  }, [timerActive, timerSeconds]);
 
   if (isLoading) {
     return (
@@ -137,11 +157,106 @@ const RecipeDetail = () => {
             </div>
           </div>
 
+          {/* Ingredients Section */}
+          <div className="mb-12">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <ChefHat className="mr-3 text-orange-500" size={28} />
+                Ingredients
+              </h2>
+              <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl">
+                <span className="text-sm font-medium text-gray-600">Servings:</span>
+                <select 
+                  value={servingsMultiplier}
+                  onChange={(e) => setServingsMultiplier(Number(e.target.value))}
+                  className="bg-transparent font-bold text-orange-500 focus:outline-none"
+                >
+                  <option value={1}>Default (1x)</option>
+                  <option value={2}>2x</option>
+                  <option value={4}>4x</option>
+                  <option value={6}>6x</option>
+                  <option value={8}>8x</option>
+                </select>
+              </div>
+            </div>
+            
+            {recipe.ingredients && recipe.ingredients.length > 0 ? (
+              <ul className="space-y-3">
+                {recipe.ingredients.map((ingredient, idx) => {
+                  // Simple parser to multiply numbers at the start of the ingredient string
+                  const match = ingredient.match(/^([\d./]+)\s*(.*)/);
+                  let displayIngredient = ingredient;
+                  
+                  if (match && servingsMultiplier !== 1) {
+                    const numStr = match[1];
+                    const rest = match[2];
+                    
+                    // Convert fractions like 1/2 to decimal
+                    let num = 0;
+                    if (numStr.includes('/')) {
+                      const [numPart, denPart] = numStr.split('/');
+                      num = parseFloat(numPart) / parseFloat(denPart);
+                    } else {
+                      num = parseFloat(numStr);
+                    }
+                    
+                    if (!isNaN(num)) {
+                      displayIngredient = `${+(num * servingsMultiplier).toFixed(2)} ${rest}`;
+                    }
+                  }
+                  
+                  return (
+                    <li key={idx} className="flex items-center text-gray-700 bg-orange-50/50 p-3 rounded-xl">
+                      <div className="w-2 h-2 bg-orange-400 rounded-full mr-4"></div>
+                      {displayIngredient}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-gray-500 italic">No ingredients specified.</p>
+            )}
+          </div>
+
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <ChefHat className="mr-3 text-orange-500" size={28} />
-              Instructions
-            </h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <List className="mr-3 text-orange-500" size={28} />
+                Instructions
+              </h2>
+              <div className="flex items-center gap-2 bg-gray-900 text-white px-4 py-2 rounded-xl">
+                <Clock size={18} className="text-orange-400" />
+                <span className="font-mono text-lg font-bold">
+                  {Math.floor(timerSeconds / 60).toString().padStart(2, '0')}:{(timerSeconds % 60).toString().padStart(2, '0')}
+                </span>
+                {timerActive ? (
+                  <button onClick={() => setTimerActive(false)} className="text-orange-400 hover:text-white transition-colors ml-2">
+                    <Pause size={18} />
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      if (timerSeconds === 0) setTimerSeconds(15 * 60); // Default 15 min
+                      setTimerActive(true);
+                    }} 
+                    className="text-orange-400 hover:text-white transition-colors ml-2"
+                  >
+                    <Play size={18} />
+                  </button>
+                )}
+                <button 
+                  onClick={() => {
+                    setTimerActive(false);
+                    const mins = prompt('Enter timer minutes:', '15');
+                    if (mins && !isNaN(mins)) setTimerSeconds(Number(mins) * 60);
+                  }} 
+                  className="text-gray-400 hover:text-white transition-colors ml-1"
+                >
+                  <Square size={16} />
+                </button>
+              </div>
+            </div>
+            
             <div className="prose prose-orange max-w-none mb-12">
               {recipe.instructions.split('\n').map((paragraph, index) => (
                 paragraph.trim() ? <p key={index} className="text-gray-600 leading-relaxed mb-4">{paragraph}</p> : null

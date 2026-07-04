@@ -41,6 +41,10 @@ const recipeSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add instructions'],
     },
+    ingredients: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
